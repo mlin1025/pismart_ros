@@ -4,6 +4,7 @@
 import rospy
 import rosnode
 from geometry_msgs.msg import Vector3
+from std_msgs.msg import Int32
 from pismart.pismart import PiSmart
 from pismart.motor import Motor
 from pismart.led import LED 
@@ -39,9 +40,8 @@ def listener():
     nodeNameList = rosnode.get_node_names();
 
     createNode = False
-    i = 0;
+    i = 0
     while True:
-    	pass
     	nameExist = False
     	for name in nodeNameList:
     		if name == 'pismart' + str(i):
@@ -57,6 +57,7 @@ def listener():
 
     rospy.init_node(nodeName, anonymous=True)
     rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
+    rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
     rospy.spin()
 
 if __name__ == '__main__':
