@@ -14,7 +14,7 @@ p = PiSmart()
 motorA = Motor("MotorA")
 motorB = Motor("MotorB")
 p.motor_switch(1)
-time = 0
+global time
 
 def ledCallback(light):
     leds = LED()
@@ -27,16 +27,10 @@ def motorCallback(speed):
 
     motorA.speed = int(motorRight)
     motorB.speed = int(motorLeft)
-
+    global time
     time = rospy.Time.now()
 
 def listener():
-    print "start listening"
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
     nodeNameList = rosnode.get_node_names();
     createNode = False
     i = 0
@@ -50,6 +44,7 @@ def listener():
 
         if not nameExist:
             nodeName = 'pismart' + str(i)
+            print nodeName
             break
 
         i = i + 1
@@ -58,10 +53,12 @@ def listener():
     rospy.init_node(nodeName, anonymous=False)
     rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
     rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
+    print "start listening"
+    global time
     time = rospy.Time.now()
     r = rospy.Rate(100)
     while not rospy.is_shutdown():
-        if (time - rospy.Time.now()).to_sec() > 1:
+        if (rospy.Time.now() - time).to_sec() > 0.5:
             motorA.speed = 0
             motorB.speed = 0
         r.sleep()
