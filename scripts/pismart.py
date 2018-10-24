@@ -17,7 +17,7 @@ p.motor_switch(1)
 
 def ledCallback(light):
 	leds = LED()
-	leds.brightness = light
+	leds.brightness = light.data
 
 def motorCallback(speed):
     
@@ -38,13 +38,13 @@ def listener():
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
     nodeNameList = rosnode.get_node_names();
-
     createNode = False
     i = 0
     while True:
     	nameExist = False
     	for name in nodeNameList:
-    		if name == 'pismart' + str(i):
+                print name[:9]
+    		if name[:9] == '/pismart' + str(i):
     			nameExist = True
     			break
 
@@ -55,7 +55,7 @@ def listener():
     	i = i + 1
     
 
-    rospy.init_node(nodeName, anonymous=True)
+    rospy.init_node(nodeName, anonymous=False)
     rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
     rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
     rospy.spin()
