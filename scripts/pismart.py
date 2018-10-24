@@ -24,8 +24,8 @@ def motorCallback(speed):
     motorRight = max(min(speed.x,100),-100)
     motorLeft = max(min(speed.y,100),-100)
 
-    motorA.speed = (int)motorRight
-    motorB.speed = (int)motorLeft
+    motorA.speed = int(motorRight)
+    motorB.speed = int(motorLeft)
 
 def listener():
     print "start listening"
