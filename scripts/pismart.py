@@ -14,10 +14,11 @@ p = PiSmart()
 motorA = Motor("MotorA")
 motorB = Motor("MotorB")
 p.motor_switch(1)
+time = 0
 
 def ledCallback(light):
-	leds = LED()
-	leds.brightness = light.data
+    leds = LED()
+    leds.brightness = light.data
 
 def motorCallback(speed):
     
@@ -26,6 +27,8 @@ def motorCallback(speed):
 
     motorA.speed = int(motorRight)
     motorB.speed = int(motorLeft)
+
+    time = rospy.Time.now()
 
 def listener():
     print "start listening"
@@ -38,24 +41,30 @@ def listener():
     createNode = False
     i = 0
     while True:
-    	nameExist = False
-    	for name in nodeNameList:
+        nameExist = False
+        for name in nodeNameList:
+            if name[:9] == '/pismart' + str(i):
                 print name[:9]
-    		if name[:9] == '/pismart' + str(i):
-    			nameExist = True
-    			break
+                nameExist = True
+                break
 
-    	if not nameExist:
-    		nodeName = 'pismart' + str(i)
-    		break
+        if not nameExist:
+            nodeName = 'pismart' + str(i)
+            break
 
-    	i = i + 1
+        i = i + 1
     
 
     rospy.init_node(nodeName, anonymous=False)
     rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
     rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
-    rospy.spin()
+    time = rospy.Time.now()
+    r = rospy.Rate(100)
+    while not rospy.is_shutdown():
+        if (time - rospy.Time.now()).to_sec() > 1:
+            motorA.speed = 0
+            motorB.speed = 0
+        r.sleep()
 
 if __name__ == '__main__':
     try:
