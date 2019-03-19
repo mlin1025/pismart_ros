@@ -10,6 +10,7 @@ from pismart.pismart import PiSmart
 from pismart.motor import Motor
 from pismart.led import LED
 import threading
+from mpu6050 import mpu6050
 
 
 p = PiSmart()
@@ -33,9 +34,27 @@ def motorCallback(speed):
     time = rospy.Time.now()
     print time
 
-def imuThread:
+def imuThread():
+    pub = rospy.Publisher(rospy.get_name()[1:] + "_imu", Imu, queue_size=1)
+    sensor = mpu6050(0x68)
+    r = rospy.Rate(100)
     while not rospy.is_shutdown():
         imuData = Imu()
+        angular = sensor.get_gyro_data()
+        accel = sensor.get_accel_data()
+
+        imuData.header.stamp = rospy.Time.now()
+
+        imuData.angular_velocity.x = angular['x']
+        imuData.angular_velocity.y = angular['y']
+        imuData.angular_velocity.z = angular['z']
+
+        imuData.linear_acceleration.x = accel['x']
+        imuData.linear_acceleration.y = accel['y']
+        imuData.linear_acceleration.z = accel['z']
+        pub.publish(imuData)
+        r.sleep()
+
         
 
 def listener():
@@ -73,8 +92,13 @@ def listener():
 
 if __name__ == '__main__':
     try:
+        t = threading.Thread(target=imuThread)
+        t.start()
         listener()
+        t.join()
     except KeyboardInterrupt:
+        motorA.speed = 0
+        motorB.speed = 0
         motorA.stop()
         motorB.stop()
         p.motor_switch(0)
