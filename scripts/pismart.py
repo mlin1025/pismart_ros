@@ -5,9 +5,11 @@ import rospy
 import rosnode
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Int32
+from sensor_msgs import Imu
 from pismart.pismart import PiSmart
 from pismart.motor import Motor
-from pismart.led import LED 
+from pismart.led import LED
+import threading
 
 
 p = PiSmart()
@@ -29,27 +31,33 @@ def motorCallback(speed):
     motorB.speed = int(motorLeft)
     global time
     time = rospy.Time.now()
+    print time
+
+def imuThread:
+    while not rospy.is_shutdown():
+        imuData = Imu()
+        
 
 def listener():
-    nodeNameList = rosnode.get_node_names();
-    createNode = False
-    i = 0
-    while True:
-        nameExist = False
-        for name in nodeNameList:
-            if name[:9] == '/pismart' + str(i):
-                print name[:9]
-                nameExist = True
-                break
+    #nodeNameList = rosnode.get_node_names();
+    #createNode = False
+    #i = 0
+    #while True:
+    #    nameExist = False
+    #    for name in nodeNameList:
+    #        if name[:9] == '/pismart' + str(i):
+    #            print name[:9]
+    #            nameExist = True
+    #            break
 
-        if not nameExist:
-            nodeName = 'pismart' + str(i)
-            print nodeName
-            break
+    #    if not nameExist:
+    #        nodeName = 'pismart' + str(i)
+    #        print nodeName
+    #        break
 
-        i = i + 1
-    
-
+    #    i = i + 1
+    nodeName = 'pismart0'
+    print nodeName
     rospy.init_node(nodeName, anonymous=False)
     rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
     rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
