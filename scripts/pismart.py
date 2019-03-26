@@ -5,7 +5,7 @@ import rospy
 import rosnode
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Int32
-from sensor_msgs import Imu
+from sensor_msgs.msg import Imu
 from pismart.pismart import PiSmart
 from pismart.motor import Motor
 from pismart.led import LED
@@ -37,11 +37,11 @@ def motorCallback(speed):
 def imuThread():
     pub = rospy.Publisher(rospy.get_name()[1:] + "_imu", Imu, queue_size=1)
     sensor = mpu6050(0x68)
-    r = rospy.Rate(100)
+    r = rospy.Rate(20)
     while not rospy.is_shutdown():
         imuData = Imu()
         angular = sensor.get_gyro_data()
-        accel = sensor.get_accel_data()
+        #accel = sensor.get_accel_data()
 
         imuData.header.stamp = rospy.Time.now()
 
@@ -49,9 +49,9 @@ def imuThread():
         imuData.angular_velocity.y = angular['y']
         imuData.angular_velocity.z = angular['z']
 
-        imuData.linear_acceleration.x = accel['x']
-        imuData.linear_acceleration.y = accel['y']
-        imuData.linear_acceleration.z = accel['z']
+        #imuData.linear_acceleration.x = accel['x']
+        #imuData.linear_acceleration.y = accel['y']
+        #imuData.linear_acceleration.z = accel['z']
         pub.publish(imuData)
         r.sleep()
 
@@ -75,12 +75,6 @@ def listener():
     #        break
 
     #    i = i + 1
-    nodeName = 'pismart0'
-    print nodeName
-    rospy.init_node(nodeName, anonymous=False)
-    rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
-    rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
-    print "start listening"
     global time
     time = rospy.Time.now()
     r = rospy.Rate(100)
@@ -92,6 +86,13 @@ def listener():
 
 if __name__ == '__main__':
     try:
+        nodeName = 'pismart0'
+        print nodeName
+        rospy.init_node(nodeName, anonymous=False)
+        rospy.Subscriber(nodeName+'_motor_speed', Vector3, motorCallback)
+        rospy.Subscriber(nodeName+'_led', Int32, ledCallback)
+        print "start listening"
+
         t = threading.Thread(target=imuThread)
         t.start()
         listener()
